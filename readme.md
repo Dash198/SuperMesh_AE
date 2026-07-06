@@ -95,7 +95,7 @@ To reproduce the graphs from the papers, first go to the **supermesh_python_scri
    - `python fig_16_plot_bandwidth_others.py`
 8. To reproduce the results for Figure 17, run the following command. Running the following script will generate a file named *fig_17_bandwidth_fixed_topo.pdf*.
    - `python fig_17_plot_bandwidth_fixed_topo.py`
-9. To reproduce the results for Figure 18, run the following command. Running the following script will generate a file named *fig_18_link_utl_134217728_updated_new.pdf*.
+9. To reproduce the results for Figure 18, run the following command. Running the following script will generate a file named *fig_18_link_utl_134217728_updated_new.pdf*. Note: The micro_2025 directory requires a link_utl folder, which is not included here due to its large size. You can download it from [this link](https://doi.org/10.5281/zenodo.16732100).
    - `python fig_18_plot_link_utilization.py`
 10. To reproduce the results for Figure 19, run the following command. Running the following script will generate a file named *fig_19_bandwidth_different_topo_updated.pdf*.
     - `python fig_19_plot_bandwidth_different_topo.py`
