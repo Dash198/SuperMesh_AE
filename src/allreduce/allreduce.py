@@ -370,11 +370,24 @@ class Allreduce(ABC):
         elif col != nodes_in_dimension - 1:
             east = source_node + 1
 
+        if topology == 'SM_Long':
+            # Two-hop express links get one dedicated NI per direction:
+            # west=4, east=5, north=6, south=7. They never contend with a
+            # one-hop move or with an express move in another direction.
+            if dest_node == source_node - 2 and col >= 2:
+                return 4, 4
+            if dest_node == source_node + 2 and col + 2 < nodes_in_dimension:
+                return 5, 5
+            if dest_node == source_node - 2 * nodes_in_dimension and row >= 2:
+                return 6, 6
+            if dest_node == source_node + 2 * nodes_in_dimension and row + 2 < nodes_in_dimension:
+                return 7, 7
+
         assert (dest_node == north) or (dest_node == east) or (dest_node == south) or (dest_node == west)
 
         dest_ni = None
         src_ni = None
-        if topology == 'torus' or topology == 'mesh':
+        if topology == 'torus' or topology == 'mesh' or topology == 'SM_Long':
             if dest_node == north:
                 dest_ni = 2
                 src_ni = 0

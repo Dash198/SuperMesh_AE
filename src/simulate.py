@@ -44,6 +44,7 @@ def construct_network(args):
 
     if (args.booksim_network == 'mesh' or args.booksim_network == 'SM_Bi'
             or args.booksim_network == 'SM_Alter' or args.booksim_network == 'SM_Uni'
+            or args.booksim_network == 'SM_Long'
             or args.booksim_network == 'Partial_SM_Bi' or args.booksim_network == 'Partial_SM_Alter'):
         network = KNCube(args, mesh=True)
     elif args.booksim_network == 'torus':
@@ -383,6 +384,8 @@ def main():
     # else:
     if args.booksim_network == 'SM_Bi' or args.booksim_network == 'Partial_SM_Bi':
         args.radix = 5
+    elif args.booksim_network == 'SM_Long':
+        args.radix = 8
     elif args.booksim_network == 'SM_Alter' and args.per_dim_nodes % 2 != 0:
         args.radix = 5
     else:
@@ -719,13 +722,6 @@ def main():
 
     compute_percentile = compute_cycles / cycles * 100
     allreduce_percentile = allreduce_cycles / cycles * 100
-    if args.save_link_utilization:
-        save_object = {}
-        save_object['link_start_time'] = network.link_start_times
-        save_object['link_end_time'] = network.link_end_times
-        save_object['total_time'] = cycles
-        save_object['total_links'] = allreduce.network.total_possible_links
-        pickle.dump(save_object, open(link_utilization_file, "wb"))
 
     logger.info('\n======== Simulation Summary ========')
     logger.info('Training epoch runtime: {} cycles'.format(cycles))
@@ -777,6 +773,11 @@ def main():
     link_dyn_power = network.booksim.GetLinkDynPower()
     link_leak_power = network.booksim.GetLinkLeakPower()
     net_link_activities = network.booksim.GetNetLinkActivities()
+    channel_activities = [
+        (int(src), int(dst), int(flits))
+        for src, dst, flits in network.booksim.GetChannelActivities()
+    ]
+    channel_activity_sum = sum(flits for _, _, flits in channel_activities)
 
     # print("Active area: " + str(network.booksim.GetActiveArea()))
 
@@ -795,6 +796,25 @@ def main():
     sim['results']['power']['network']['link']['static'] = link_leak_power
     sim['results']['power']['network']['link']['total'] = link_dyn_power + link_leak_power
     sim['results']['power']['network']['link']['flits'] = net_link_activities
+    sim['results']['power']['network']['link']['channels'] = [
+        {'src_router': src, 'dst_router': dst, 'flits': flits}
+        for src, dst, flits in channel_activities
+    ]
+    sim['results']['power']['network']['link']['channel_activity_sum'] = channel_activity_sum
+    sim['results']['power']['network']['link']['channel_activity_matches_aggregate'] = (
+        channel_activity_sum == net_link_activities
+    )
+
+    if args.save_link_utilization:
+        save_object = {}
+        save_object['link_start_time'] = network.link_start_times
+        save_object['link_end_time'] = network.link_end_times
+        save_object['total_time'] = cycles
+        save_object['total_links'] = allreduce.network.total_possible_links
+        save_object['channel_activities'] = channel_activities
+        save_object['channel_activity_sum'] = channel_activity_sum
+        save_object['net_link_activities'] = net_link_activities
+        pickle.dump(save_object, open(link_utilization_file, "wb"))
 
     with open(jsonfile_name, 'w') as simfile:
         json.dump(sim, simfile, indent=4)

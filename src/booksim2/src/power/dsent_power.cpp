@@ -52,6 +52,7 @@ void DSENTPower::resetPowerStats()
   _link_dyn_power = 0.0;
   _link_leak_power = 0.0;
   _network_channel_activities = 0;
+  _channel_activities.clear();
 
   // network power
   _net_dyn_power = 0.0;
@@ -147,11 +148,20 @@ void DSENTPower::calcLinkPower()
     _link_leak_power += dsent->queryResult("link_static");
   }
 
+  _channel_activities.clear();
+  _network_channel_activities = 0;
   for (int i = 0; i < _net->NumChannels(); i++) {
     const vector<int> temp = chan[i]->GetActivity();
-    //double link_act = 0.0;
+    uint64_t channel_flits = 0;
     for (int j = 0; j < _classes; j++)
-        _network_channel_activities += temp[j];
+        channel_flits += temp[j];
+    _network_channel_activities += channel_flits;
+    Router const * src = chan[i]->GetSource();
+    Router const * dst = chan[i]->GetSink();
+    _channel_activities.push_back(std::make_tuple(
+        src ? src->GetID() : -1,
+        dst ? dst->GetID() : -1,
+        channel_flits));
     //  link_act += temp[j];
     //_link_dyn_power += dsent->queryResult("link_dynamic") * (link_act / _total_time);
     //_link_leak_power += dsent->queryResult("link_static");

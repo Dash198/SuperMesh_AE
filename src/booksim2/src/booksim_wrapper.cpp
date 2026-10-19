@@ -361,3 +361,10 @@ uint64_t BookSim::GetNetLinkActivities()
       return 0;
 }
 
+std::vector<std::tuple<int, int, uint64_t>> BookSim::GetChannelActivities()
+{
+    if (_power_model)
+      return _power_model->GetChannelActivities();
+    else
+      return {};
+}

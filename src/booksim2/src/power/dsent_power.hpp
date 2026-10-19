@@ -1,6 +1,10 @@
 #ifndef _DSENT_POWER_HPP_
 #define _DSENT_POWER_HPP_
 
+#include <cstdint>
+#include <tuple>
+#include <vector>
+
 #include "network.hpp"
 #include "config_utils.hpp"
 #include "flitchannel.hpp"
@@ -45,6 +49,8 @@ protected:
   double _link_dyn_power;
   double _link_leak_power;
   uint64_t _network_channel_activities;
+  // One entry per physical FlitChannel: (source router, sink router, flits).
+  vector<tuple<int, int, uint64_t>> _channel_activities;
 
   // network power
   double _net_dyn_power;
@@ -84,6 +90,9 @@ public:
   inline double GetLinkLeakPower() const { return _link_leak_power; }
   inline double GetActiveArea() const { return _active_area; }
   inline uint64_t GetNetLinkActivities() const { return _network_channel_activities; }
+  inline const vector<tuple<int, int, uint64_t>> & GetChannelActivities() const {
+    return _channel_activities;
+  }
 
 };
 

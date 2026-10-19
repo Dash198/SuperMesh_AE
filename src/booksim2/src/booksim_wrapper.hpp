@@ -9,6 +9,8 @@
 #include "dsent_power.hpp"
 
 #include <string>
+#include <tuple>
+#include <vector>
 
 class BookSim {
 
@@ -39,6 +41,7 @@ public:
   double GetLinkLeakPower();
   double GetActiveArea();
   uint64_t GetNetLinkActivities();
+  std::vector<std::tuple<int, int, uint64_t>> GetChannelActivities();
 
   bool RunTest();
   inline bool Idle() { return _traffic_manager->Idle() && _outstanding_messages == 0; }

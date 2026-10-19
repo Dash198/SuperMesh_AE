@@ -1,4 +1,5 @@
 import copy
+import os
 import pickle
 from copy import deepcopy
 
@@ -91,7 +92,7 @@ class MultiTreeAllreduce(Allreduce):
         return trees, timesteps
 
     def compute_trees(self, sort=False, verbose=False):
-        if self.args.load_tree:
+        if self.args.load_tree and os.path.isfile(self.args.saved_tree_name):
             save_object = pickle.load(open(self.args.saved_tree_name, 'rb'))
             self.max_tree_height_for_pipeline = save_object['max_tree_height_for_pipeline']
             self.trees_rs = save_object['trees_rs']
@@ -113,6 +114,7 @@ class MultiTreeAllreduce(Allreduce):
             save_object = {'max_tree_height_for_pipeline': self.max_tree_height_for_pipeline, 'trees_rs': self.trees_rs,
                            'trees_ag': self.trees_ag, 'timesteps_rs': self.timesteps_rs,
                            'timesteps_ag': self.timesteps_ag, 'tree_roots': self.tree_roots}
+            os.makedirs(os.path.dirname(self.args.saved_tree_name), exist_ok=True)
             pickle.dump(save_object, open(self.args.saved_tree_name, "wb"))
             print("Saved tree information")
 

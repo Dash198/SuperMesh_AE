@@ -1,6 +1,7 @@
 #ifdef LIB_BOOKSIM
 
 #include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
 #include "booksim_wrapper.hpp"
 
@@ -38,6 +39,7 @@ PYBIND11_MODULE(pybooksim, m) {
     .def("GetLinkLeakPower", &BookSim::GetLinkLeakPower)
     .def("GetActiveArea", &BookSim::GetActiveArea)
     .def("GetNetLinkActivities", &BookSim::GetNetLinkActivities)
+    .def("GetChannelActivities", &BookSim::GetChannelActivities)
     ;
 
   py::class_<Message, std::unique_ptr<Message, py::nodelete>> message(m, "Message");

@@ -159,7 +159,30 @@ class KNCube(Network):
             elif col != self.dimension - 1:
                 east = node + 1
 
-            if self.args.booksim_network == 'SM_Bi':
+            if self.args.booksim_network == 'SM_Long':
+                # Hierarchy-aware express links: connect every router to the
+                # router two hops east/south when that stays inside the mesh.
+                # These skip one intermediate router and use the existing
+                # directional NI, so radix stays at four.
+                express = []
+                for node in range(self.nodes):
+                    row = node // self.dimension
+                    col = node % self.dimension
+                    if col + 2 < self.dimension:
+                        express.append((node, node + 2))
+                    if row + 2 < self.dimension:
+                        express.append((node, node + 2 * self.dimension))
+                for source, target in express:
+                    for graph in (self.switch_to_switch_ag, self.switch_to_switch_rs):
+                        graph[source].append((target, 0))
+                        graph[target].append((source, 0))
+                    self.total_possible_links += 2
+                    for src, dst in ((source, target), (target, source)):
+                        self.links_usage[src, dst] = (0, 0, -1)
+                        self.link_start_times[src, dst] = []
+                        self.link_end_times[src, dst] = []
+                    self.added_links.append((source, target))
+            elif self.args.booksim_network == 'SM_Bi':
                 if row == 0 and col == 0:
                     self.switch_to_switch_ag[node].insert(0, (south, 0))
                     self.switch_to_switch_ag[node].insert(0, (east, 0))
